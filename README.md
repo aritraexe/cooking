@@ -1,4 +1,4 @@
-# FileKit
+# FluxForge
 
 Every PDF and image tool in one place — compressed, resized, converted, and
 edited entirely in the browser. Nothing you drop into it is ever uploaded
