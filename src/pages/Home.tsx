@@ -53,7 +53,7 @@ export function Home() {
   return (
     <div>
       <section className="mx-auto max-w-3xl px-6 pb-16 pt-16 text-center sm:pt-24">
-        <h1 className="text-balance font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
+        <h1 className="ff-hero-title text-balance text-4xl sm:text-5xl">
           Every PDF and image tool, in one place.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-balance text-lg text-ink-muted">
@@ -70,7 +70,7 @@ export function Home() {
         </div>
 
         {heroFile && choices && choices.length > 0 && (
-          <div className="mt-4 rounded-xl border border-line bg-surface p-4 text-left">
+          <div className="ff-card mt-4 rounded-xl border p-4 text-left">
             <p className="text-sm text-ink-muted">
               What would you like to do with <span className="text-ink">{heroFile.name}</span>?
             </p>
@@ -80,7 +80,7 @@ export function Home() {
                   key={tool.id}
                   type="button"
                   onClick={() => navigate(`/tools/${tool.path}`, { state: { file: heroFile } })}
-                  className="rounded-lg border border-line bg-page px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:border-accent/50 hover:text-accent"
+                  className="ff-control rounded-lg border px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:border-accent/50 hover:text-accent"
                 >
                   {tool.name}
                 </button>
@@ -90,7 +90,7 @@ export function Home() {
         )}
 
         {heroFile && choices && choices.length === 0 && (
-          <div className="mt-4 rounded-xl border border-line bg-surface p-4 text-left text-sm text-ink-muted">
+          <div className="ff-card mt-4 rounded-xl border p-4 text-left text-sm text-ink-muted">
             Tools for that file type are still on the way — see what's live below.
           </div>
         )}

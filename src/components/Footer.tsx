@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t border-line">
+    <footer className="ff-footer border-t border-line">
       <div className="mx-auto max-w-5xl px-6 py-10">
         <p className="group font-display text-sm font-medium text-ink">
           <span>

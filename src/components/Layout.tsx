@@ -4,7 +4,7 @@ import { Header } from './Header'
 
 export function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-page">
+    <div className="flex min-h-screen flex-col bg-transparent">
       <Header />
       <main className="flex-1">
         <Outlet />

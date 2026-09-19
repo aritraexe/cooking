@@ -20,7 +20,7 @@ export function ToolCard({ tool }: { tool: ToolMeta }) {
     return (
       <Link
         to={`/tools/${tool.path}`}
-        className="group block rounded-xl border border-line bg-surface p-5 transition-colors hover:border-accent/50 hover:bg-surface-hover"
+        className="ff-card group block rounded-xl border p-5"
       >
         {content}
       </Link>
@@ -28,7 +28,7 @@ export function ToolCard({ tool }: { tool: ToolMeta }) {
   }
 
   return (
-    <div className="block cursor-default rounded-xl border border-line/60 p-5 opacity-60">
+    <div className="ff-card block cursor-default rounded-xl border border-line/60 p-5 opacity-60">
       {content}
     </div>
   )

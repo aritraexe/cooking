@@ -22,8 +22,8 @@ export function FileDropzone({ accept, hint, onFile }: FileDropzoneProps) {
 
   return (
     <div
-      className={`relative rounded-2xl border border-dashed p-10 text-center transition-colors sm:p-14 ${
-        isDragging ? 'border-accent bg-accent/5' : 'border-line bg-surface'
+      className={`ff-dropzone relative rounded-2xl border border-dashed p-10 text-center transition-colors sm:p-14 ${
+        isDragging ? 'border-accent bg-accent/5' : 'border-line'
       }`}
       onDragOver={(event) => {
         event.preventDefault()
