@@ -18,7 +18,32 @@ function transformText(value: string, operation: string) {
   if (operation.includes('unescape')) return value.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
   if (operation.includes('escape')) return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   if (operation.includes('extract-text-from-html')) return value.replace(/<[^>]*>/g, '')
-  if (operation.includes('beautify') || operation.includes('format')) {
+  if (operation.includes('json-to-csv')) {
+    const rows = JSON.parse(value)
+    const matrix = Array.isArray(rows) ? rows : [rows]
+    return matrix.map((row) => Object.values(row).join(',')).join('\n')
+  }
+  if (operation.includes('json-to-xml')) {
+    const parsed = JSON.parse(value) as Record<string, unknown>
+    const toXml = (obj: Record<string, unknown>, rootName = 'root'): string => {
+      const entries = Object.entries(obj).map(([childKey, childValue]) => {
+        if (Array.isArray(childValue)) {
+          return childValue.map((item) => `<${childKey}>${typeof item === 'object' && item !== null ? toXml(item as Record<string, unknown>, childKey) : String(item)}</${childKey}>`).join('')
+        }
+        if (typeof childValue === 'object' && childValue !== null) {
+          return `<${childKey}>${toXml(childValue as Record<string, unknown>, childKey)}</${childKey}>`
+        }
+        return `<${childKey}>${String(childValue)}</${childKey}>`
+      })
+      return `<${rootName}>${entries.join('')}</${rootName}>`
+    }
+    return toXml(parsed)
+  }
+  if (operation.includes('xml-to-json')) {
+    const normalized = value.replace(/<\/?[A-Za-z0-9_-]+>/g, '').trim()
+    return JSON.stringify({ raw: normalized }, null, 2)
+  }
+  if (operation.includes('beautify') || operation.includes('format') || operation.includes('validate')) {
     try { return JSON.stringify(JSON.parse(value), null, 2) } catch { return value.split('\n').map((line) => line.trim()).join('\n') }
   }
   return value

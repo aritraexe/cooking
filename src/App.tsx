@@ -12,6 +12,8 @@ import { DataOperationPage } from '@/tools/data/DataOperationPage'
 import { MediaOperationPage } from '@/tools/media/MediaOperationPage'
 import { OcrOperationPage } from '@/tools/ocr/OcrOperationPage'
 import { DocumentOperationPage } from '@/tools/document/DocumentOperationPage'
+import { UtilityOperationPage } from '@/tools/utility/UtilityOperationPage'
+import { BatchImagePage } from '@/tools/image/BatchImagePage'
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
         <Route path="tools/media/:operation" element={<MediaOperationPage />} />
         <Route path="tools/ocr" element={<OcrOperationPage />} />
         <Route path="tools/document/:operation" element={<DocumentOperationPage />} />
+        <Route path="tools/utility/:operation" element={<UtilityOperationPage />} />
+        <Route path="tools/image/batch" element={<BatchImagePage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
