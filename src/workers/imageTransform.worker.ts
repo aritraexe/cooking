@@ -45,10 +45,14 @@ self.onmessage = async (event: MessageEvent<TransformRequest>) => {
     if (operation === 'sepia') ctx.filter = 'sepia(1)'
     if (operation === 'invert') ctx.filter = 'invert(1)'
     if (operation === 'blur') ctx.filter = `blur(${Math.max(1, amount)}px)`
+    if (operation === 'sharpen') ctx.filter = 'contrast(1.18) saturate(1.08)'
     if (operation === 'saturation') ctx.filter = `saturate(${Math.max(0, 1 + amount / 100)})`
     if (operation === 'hue') ctx.filter = `hue-rotate(${amount}deg)`
     if (operation === 'vintage') ctx.filter = 'sepia(0.35) saturate(0.8) contrast(1.1)'
     if (operation === 'vignette') ctx.filter = 'contrast(1.08) brightness(0.92)'
+    if (operation === 'posterize') ctx.filter = 'contrast(1.35) saturate(1.25)'
+    if (operation === 'grain') ctx.filter = 'contrast(1.12) brightness(1.03)'
+    if (operation === 'edge-detection') ctx.filter = 'grayscale(1) contrast(2.2) brightness(1.1)'
     if (operation === 'pixelate') ctx.imageSmoothingEnabled = false
     const sourceX = isCrop ? Math.floor((bitmap.width - targetWidth) / 2) : 0
     const sourceY = isCrop ? Math.floor((bitmap.height - targetHeight) / 2) : 0
@@ -56,6 +60,16 @@ self.onmessage = async (event: MessageEvent<TransformRequest>) => {
     const sourceHeight = isCrop ? targetHeight : bitmap.height
     ctx.drawImage(bitmap, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight)
     ctx.restore()
+    if (operation === 'transparent') {
+      const pixels = ctx.getImageData(0, 0, targetWidth, targetHeight)
+      for (let index = 0; index < pixels.data.length; index += 4) {
+        const red = pixels.data[index]
+        const green = pixels.data[index + 1]
+        const blue = pixels.data[index + 2]
+        if (red > 238 && green > 238 && blue > 238) pixels.data[index + 3] = 0
+      }
+      ctx.putImageData(pixels, 0, 0)
+    }
     bitmap.close()
 
     const blob = await canvas.convertToBlob({ type: format, quality })

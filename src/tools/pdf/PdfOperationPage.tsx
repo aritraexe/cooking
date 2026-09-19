@@ -1,7 +1,8 @@
-import { PDFDocument, StandardFonts, degrees, rgb } from 'pdf-lib'
+import { PDFDocument } from 'pdf-lib'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { FileDropzone } from '@/components/FileDropzone'
+import { loadPdf, selectedPageIndex, transformPdf } from '@/lib/pdfEngine'
 
 type PdfMode = 'merge' | 'split' | 'rotate' | 'images-to-pdf' | 'delete' | 'duplicate' | 'reverse' | 'blank' | 'reorder' | 'overlay' | 'metadata'
 
@@ -53,12 +54,12 @@ export function PdfOperationPage() {
         }
       } else if (config.mode === 'merge') {
         for (const file of files) {
-          const source = await PDFDocument.load(await file.arrayBuffer())
+          const source = await loadPdf(file)
           const pages = await output.copyPages(source, source.getPageIndices())
           pages.forEach((pdfPage) => output.addPage(pdfPage))
         }
       } else {
-        const source = await PDFDocument.load(await files[0].arrayBuffer())
+        const source = await loadPdf(files[0])
         const route = operation
         if (route.includes('metadata') || route.includes('title') || route.includes('author') || route.includes('subject') || route.includes('keywords')) {
           if (route.includes('title')) source.setTitle('FluxTools document')
@@ -69,45 +70,34 @@ export function PdfOperationPage() {
           return
         }
         if (config.mode === 'overlay' || route.includes('add-text') || route.includes('watermark') || route.includes('header') || route.includes('footer') || route.includes('page-number') || route.includes('highlight') || route.includes('underline') || route.includes('strikethrough') || route.includes('annotation') || route.includes('signature') || route.includes('initials') || route.includes('checkmark') || route.includes('cross') || route.includes('stamp')) {
-          const font = await source.embedFont(StandardFonts.Helvetica)
-          source.getPages().forEach((pdfPage, index) => {
-            const { width, height } = pdfPage.getSize()
-            const label = route.includes('watermark') ? 'FluxTools' : route.includes('page-number') ? `${index + 1}` : route.includes('footer') ? 'Processed locally' : 'FluxTools'
-            pdfPage.drawText(label, { x: route.includes('watermark') ? width / 2 - 30 : 36, y: route.includes('header') ? height - 36 : 24, size: route.includes('watermark') ? 28 : 12, font, color: rgb(0.25, 0.45, 0.8), opacity: route.includes('watermark') ? 0.28 : 0.9 })
-          })
-          finish(await source.save(), 'annotated.pdf')
+          finish(await transformPdf(files[0], route), 'annotated.pdf')
           return
         }
         if (config.mode === 'rotate') {
-          source.getPages().forEach((pdfPage) => pdfPage.setRotation(degrees(angle)))
-          const bytes = await source.save()
-          finish(bytes, 'rotated.pdf')
+          finish(await transformPdf(files[0], route, { angle }), 'rotated.pdf')
           return
         }
-        const pageIndex = Math.max(0, Math.min(source.getPageCount() - 1, page - 1))
+        const pageIndex = selectedPageIndex(source, page)
         if (config.mode === 'delete') {
           source.removePage(pageIndex)
-          finish(await source.save(), 'pages-deleted.pdf')
+          finish(await transformPdf(files[0], route, { page }), 'pages-deleted.pdf')
           return
         }
         if (config.mode === 'duplicate') {
-          const [selected] = await output.copyPages(source, [pageIndex])
-          output.addPage(selected)
-          const rest = await output.copyPages(source, source.getPageIndices().filter((index) => index !== pageIndex))
-          rest.forEach((pdfPage) => output.addPage(pdfPage))
+          finish(await transformPdf(files[0], route, { page }), 'duplicated.pdf')
+          return
         } else if (config.mode === 'reverse') {
-          const pages = await output.copyPages(source, [...source.getPageIndices()].reverse())
-          pages.forEach((pdfPage) => output.addPage(pdfPage))
+          finish(await transformPdf(files[0], route), 'reversed.pdf')
+          return
         } else if (config.mode === 'blank') {
-          const pages = await output.copyPages(source, source.getPageIndices())
-          pages.forEach((pdfPage) => output.addPage(pdfPage))
-          output.addPage()
+          finish(await transformPdf(files[0], route), 'blank-page-added.pdf')
+          return
         } else if (config.mode === 'reorder') {
-          const pages = await output.copyPages(source, [pageIndex, ...source.getPageIndices().filter((index) => index !== pageIndex)])
-          pages.forEach((pdfPage) => output.addPage(pdfPage))
+          finish(await transformPdf(files[0], route, { page }), 'reordered.pdf')
+          return
         } else {
-          const [selected] = await output.copyPages(source, [pageIndex])
-          output.addPage(selected)
+          finish(await transformPdf(files[0], route, { page }), 'extracted-page.pdf')
+          return
         }
       }
       finish(await output.save(), config.mode === 'images-to-pdf' ? 'images.pdf' : config.mode === 'merge' ? 'merged.pdf' : 'extracted-page.pdf')

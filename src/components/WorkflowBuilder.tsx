@@ -46,7 +46,7 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
     }
   }, [])
 
-  const availableOperations = getOperationsFor(family)
+  const availableOperations = getOperationsFor(family).filter((operation) => operation.status === 'AVAILABLE')
   const quickOperations = getQuickOperationsFor(family).slice(0, 4)
   const popularOperations = getPopularOperationsFor(family).slice(0, 4)
   const normalizedSearch = search.trim().toLowerCase()
@@ -54,7 +54,7 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
     () => operations.filter((operation) => {
       if (family && operation.family !== family) return false
       if (!normalizedSearch) return true
-      return `${operation.name} ${operation.description} ${operation.category}`.toLowerCase().includes(normalizedSearch)
+      return operation.status === 'AVAILABLE' && `${operation.name} ${operation.description} ${operation.category}`.toLowerCase().includes(normalizedSearch)
     }),
     [family, normalizedSearch],
   )

@@ -22,4 +22,4 @@ export interface LocalProcessor {
   cleanup?: () => void
 }
 
-export type OperationStatus = 'AVAILABLE' | 'COMING_SOON'
+export type OperationStatus = 'AVAILABLE' | 'COMING_SOON_BACKEND' | 'LOCAL_NOT_IMPLEMENTED'

@@ -12,7 +12,7 @@ export type FileCategory =
 export type ToolFamily = 'image' | 'pdf'
 
 export type ProcessingMode = 'LOCAL' | 'LOCAL_HEAVY' | 'LOCAL_AI' | 'COMING_SOON_BACKEND'
-export type OperationStatus = 'AVAILABLE' | 'COMING_SOON'
+export type OperationStatus = 'AVAILABLE' | 'COMING_SOON_BACKEND' | 'LOCAL_NOT_IMPLEMENTED'
 
 export type ToolStatus = 'active' | 'soon'
 
@@ -50,7 +50,7 @@ export interface OperationMeta {
 
 export type OutputFormat = 'image/jpeg' | 'image/webp' | 'image/png'
 
-export type ImageOperation = 'resize' | 'compress' | 'rotate' | 'flip-horizontal' | 'flip-vertical' | 'grayscale' | 'convert' | 'crop' | 'brightness' | 'contrast' | 'sepia' | 'invert' | 'blur' | 'pixelate' | 'saturation' | 'hue' | 'vintage' | 'vignette'
+export type ImageOperation = 'resize' | 'compress' | 'rotate' | 'flip-horizontal' | 'flip-vertical' | 'grayscale' | 'convert' | 'crop' | 'brightness' | 'contrast' | 'sepia' | 'invert' | 'blur' | 'pixelate' | 'saturation' | 'hue' | 'vintage' | 'vignette' | 'sharpen' | 'posterize' | 'grain' | 'edge-detection' | 'transparent'
 
 export interface TransformRequest {
   file: File

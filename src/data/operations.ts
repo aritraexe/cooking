@@ -78,13 +78,12 @@ const TEXT_LOCAL_NAMES = new Set([
   'Edit text', 'Find and replace', 'Sort lines', 'Remove duplicate lines', 'Remove blank lines', 'Trim whitespace', 'Convert case', 'Line numbering',
   'Character count', 'Word count', 'Format JSON', 'Beautify JSON', 'Minify JSON', 'JSON to CSV', 'JSON to XML', 'JSON to YAML',
   'Format HTML', 'Beautify HTML', 'Minify HTML', 'Extract text from HTML', 'Remove HTML tags', 'Format XML', 'Beautify XML', 'Minify XML',
-  'XML to JSON', 'XML to CSV', 'Compress or minify', 'Escape', 'Unescape', 'Validate JSON', 'Validate XML', 'Syntax validation', 'Encoding conversion'
+  'XML to JSON', 'Compress or minify', 'Escape', 'Unescape', 'Encode', 'Decode', 'Validate JSON', 'Validate XML', 'Validate HTML', 'Syntax validation', 'Encoding conversion'
 ])
 const DATA_LOCAL_NAMES = new Set([
-  'Edit spreadsheet', 'Convert spreadsheet', 'Sort data', 'Filter data', 'Remove duplicates', 'Find and replace', 'Add rows', 'Delete rows', 'Add columns',
-  'Delete columns', 'Merge cells', 'Split cells', 'Format spreadsheet', 'Add formulas', 'Edit formulas', 'Remove formulas', 'Convert formulas to values',
-  'Add sheet', 'Delete sheet', 'Rename sheet', 'Reorder sheets', 'Duplicate sheet', 'Charts', 'Pivot tables', 'XLSX to CSV', 'CSV to XLSX', 'XLSX to JSON',
-  'XLSX to HTML', 'XLSX to ODS', 'Create ZIP', 'Extract ZIP', 'Add files', 'Remove files', 'Replace files', 'Rename files', 'Move files', 'Compress archive'
+  'Edit spreadsheet', 'Convert spreadsheet', 'Sort data', 'Filter data', 'Remove duplicates', 'Find and replace',
+  'Add rows', 'Delete rows', 'Add columns', 'Delete columns', 'Add sheet', 'Duplicate sheet', 'Find and replace', 'Sort', 'Filter', 'XLSX to CSV', 'CSV to XLSX', 'XLSX to JSON', 'XLSX to HTML',
+  'Create ZIP', 'Extract ZIP', 'Create archive', 'Extract archive', 'Add files', 'Remove files', 'Replace files', 'Rename files', 'Compress archive', 'Recompress archive', 'Change compression level'
 ])
 const IMAGE_LOCAL_NAMES = new Set([
   'Crop', 'Resize', 'Rotate', 'Flip horizontal', 'Flip vertical', 'Straighten',
@@ -93,7 +92,7 @@ const IMAGE_LOCAL_NAMES = new Set([
   'Gamma', 'Shadows', 'Highlights', 'Blacks', 'Whites', 'Grayscale', 'Sepia',
   'Invert colors', 'Sharpen', 'Blur', 'Gaussian blur', 'Motion blur', 'Noise reduction',
   'Denoise', 'Vintage', 'Film', 'Black & white', 'Duotone', 'Pixelate', 'Posterize',
-  'Vignette', 'Convert to WebP', 'JPG', 'JPEG', 'PNG', 'WebP', 'BMP', 'GIF', 'AVIF',
+  'Vignette', 'Sharpen', 'Posterize', 'Grain', 'Edge detection', 'Upscale', 'Upscale image', 'Change aspect ratio', 'Fit to dimensions', 'Fill dimensions', 'Make transparent', 'Transparent background', 'Convert to WebP', 'JPG', 'JPEG', 'PNG', 'WebP', 'BMP', 'GIF', 'AVIF',
   'Set quality', 'Lossless compression', 'Lossy compression', 'Set transparency',
   'Set color depth', 'Set DPI', 'Set resolution', 'Progressive JPEG',
 ])
@@ -103,16 +102,25 @@ const PDF_LOCAL_NAMES = new Set([
   'Headers', 'Footers', 'Page numbers', 'View metadata', 'Edit metadata', 'Remove metadata',
   'Add metadata', 'Set title', 'Set author', 'Set subject', 'Set keywords',
   'Highlight', 'Underline', 'Strikethrough', 'Text annotation', 'Signature', 'Initials',
-  'Add date', 'Add checkmark', 'Add cross', 'Add stamp', 'Rotate pages', 'Crop pages', 'Resize pages',
-  'Delete page', 'Insert page', 'Replace page', 'Extract selected pages', 'Change page size', 'Change orientation',
-  'Adjust margins', 'Remove blank pages', 'Compress PDF', 'Convert PDF', 'Merge PDFs', 'Split PDF', 'Extract Pages', 'OCR PDF', 'Password Protect'
+  'Add date', 'Add checkmark', 'Add cross', 'Add stamp', 'Rotate pages', 'Delete page', 'Extract selected pages',
+  'Merge PDFs', 'Split PDF', 'Extract Pages', 'Add Watermark', 'Reorder Pages'
 ])
-const MEDIA_LOCAL_NAMES = new Set(['Trim video', 'Compress video', 'Convert video', 'Extract audio', 'Trim audio', 'Convert audio', 'Compress audio'])
-const OCR_LOCAL_NAMES = new Set(['Image to text', 'OCR scanned PDF', 'OCR selected area', 'OCR entire document', 'Scanned PDF to searchable PDF'])
-const DOCUMENT_LOCAL_NAMES = new Set(['Edit document', 'Edit text', 'Find and replace', 'DOCX to TXT', 'Convert document', 'Merge documents', 'Split document', 'Export PDF'])
+const MEDIA_LOCAL_NAMES = new Set([
+  'Trim video', 'Compress video', 'Convert video', 'Extract audio', 'Trim audio', 'Convert audio', 'Compress audio',
+  'Trim', 'Cut', 'Split', 'Reverse', 'Change playback speed', 'Remove audio', 'Adjust volume', 'Volume adjustment',
+  'Fade in', 'Fade out', 'Normalize', 'Remove silence', 'Change speed', 'Pitch shift', 'Noise reduction', 'Equalization', 'Change bitrate', 'Change sample rate', 'Mono to stereo', 'Stereo to mono',
+  'MP3', 'WAV', 'FLAC', 'OGG', 'AAC',
+])
+const OCR_LOCAL_NAMES = new Set(['Image to text'])
+const DOCUMENT_LOCAL_NAMES = new Set(['Edit document', 'Edit text', 'Find and replace', 'DOCX to TXT', 'DOCX to HTML', 'Convert document', 'Merge documents', 'Split document', 'Export PDF'])
 const UTILITY_LOCAL_NAMES = new Set([
   'Generate QR code', 'Decode QR code', 'Scan QR from image', 'Resize QR code', 'Change QR colors', 'Set error correction', 'Generate barcode',
-  'Decode barcode', 'HEX to RGB', 'RGB to HSL', 'RGB to CMYK', 'Contrast checker', 'Color picker', 'Palette extraction', 'Generate palette', 'Extract colors from image'
+  'Decode barcode', 'HEX to RGB', 'RGB to HSL', 'RGB to CMYK', 'Contrast checker', 'Color picker', 'Palette extraction', 'Generate palette', 'Extract colors from image',
+  'Rename file', 'Batch rename', 'Change extension', 'Add prefix', 'Add suffix', 'Sequential numbering', 'Find and replace filename', 'Remove special characters', 'Spaces to underscores', 'Spaces to hyphens', 'Lowercase filename', 'Uppercase filename', 'Download results as ZIP'
+])
+const BACKEND_REQUIRED_NAMES = new Set([
+  'Save reusable signature',
+  'Apply workflow to batch',
 ])
 
 // Keep this map aligned with App.tsx: an operation is available only when a real route and processor exist.
@@ -186,22 +194,6 @@ function buildRegistry(): OperationMeta[] {
                       : name === 'Rotate Pages' ? 'rotate-pages-pdf'
                         : name === 'Images to PDF' ? 'images-to-pdf'
                           : undefined
-    const genericPath = family === 'text'
-      ? `text/${slug(name)}`
-      : family === 'spreadsheet' || family === 'archive'
-        ? `data/${slug(name)}`
-        : family === 'pdf'
-          ? `pdf/${slug(name)}`
-          : family === 'video' || family === 'audio'
-            ? `media/${slug(name)}`
-            : family === 'document'
-              ? `document/${slug(name)}`
-              : family === 'utility'
-                ? `utility/${slug(name)}`
-                : family === 'image'
-                  ? `image/${slug(name)}`
-                  : undefined
-
     const path = operationKey && IMPLEMENTED_PROCESSORS[operationKey]
       ? IMPLEMENTED_PROCESSORS[operationKey]
       : family === 'text' && TEXT_LOCAL_NAMES.has(name)
@@ -222,12 +214,14 @@ function buildRegistry(): OperationMeta[] {
                       ? `utility/${slug(name)}`
                       : family === 'image' && IMAGE_LOCAL_NAMES.has(name)
                         ? `image/${slug(name)}`
-                        : genericPath && (
-                          (family === 'text' || family === 'spreadsheet' || family === 'archive' || family === 'document' || family === 'utility' || family === 'image' || family === 'video' || family === 'audio' || family === 'pdf')
-                        )
-                          ? genericPath
-                          : undefined
+                        : undefined
     const available = Boolean(path)
+    const backendRequired = category === 'AI' || BACKEND_REQUIRED_NAMES.has(name)
+    const status = available
+      ? 'AVAILABLE' as const
+      : backendRequired
+        ? 'COMING_SOON_BACKEND' as const
+        : 'LOCAL_NOT_IMPLEMENTED' as const
     return {
       id,
       name,
@@ -243,7 +237,7 @@ function buildRegistry(): OperationMeta[] {
       available,
       previewSupport: available,
       processor: path ? path : 'unimplemented',
-      status: available ? 'AVAILABLE' : 'COMING_SOON',
+      status,
       ...(path ? { path } : {}),
     }
   }))

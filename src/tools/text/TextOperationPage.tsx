@@ -18,6 +18,21 @@ function transformText(value: string, operation: string) {
   if (operation.includes('unescape')) return value.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
   if (operation.includes('escape')) return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   if (operation.includes('extract-text-from-html')) return value.replace(/<[^>]*>/g, '')
+  if (operation === 'encode') return btoa(unescape(encodeURIComponent(value)))
+  if (operation === 'decode') {
+    try { return decodeURIComponent(escape(atob(value))) } catch { return 'Unable to decode this value as Base64.' }
+  }
+  if (operation.includes('validate-html')) {
+    const document = new DOMParser().parseFromString(value, 'text/html')
+    return document.querySelector('parsererror') ? 'Invalid HTML document.' : 'Valid HTML document.'
+  }
+  if (operation.includes('validate-json')) {
+    try { JSON.parse(value); return 'Valid JSON document.' } catch { return 'Invalid JSON document.' }
+  }
+  if (operation.includes('validate-xml')) {
+    const document = new DOMParser().parseFromString(value, 'application/xml')
+    return document.querySelector('parsererror') ? 'Invalid XML document.' : 'Valid XML document.'
+  }
   if (operation.includes('json-to-csv')) {
     const rows = JSON.parse(value)
     const matrix = Array.isArray(rows) ? rows : [rows]

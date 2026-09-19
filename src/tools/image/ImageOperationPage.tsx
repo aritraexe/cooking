@@ -20,19 +20,29 @@ const operationLabels: Record<string, { title: string; description: string; oper
   hue: { title: 'Adjust Hue', description: 'Shift image colors locally.', operation: 'hue' },
   vintage: { title: 'Vintage Effect', description: 'Apply a vintage color treatment locally.', operation: 'vintage' },
   vignette: { title: 'Vignette', description: 'Apply a subtle vignette treatment locally.', operation: 'vignette' },
+  sharpen: { title: 'Sharpen Image', description: 'Increase local image detail with a browser-native enhancement.', operation: 'sharpen' },
+  posterize: { title: 'Posterize Image', description: 'Apply a high-contrast poster effect locally.', operation: 'posterize' },
+  grain: { title: 'Film Grain', description: 'Apply a subtle film-grain treatment locally.', operation: 'grain' },
+  'edge-detection': { title: 'Edge Detection', description: 'Create a high-contrast edge-style image locally.', operation: 'edge-detection' },
+  transparent: { title: 'Make Transparent', description: 'Remove near-white background pixels locally.', operation: 'transparent' },
 }
 
 function inferOperation(routeOperation: string): ImageOperation | 'flip' {
   if (routeOperation.includes('flip')) return 'flip'
   if (routeOperation.includes('crop') || routeOperation.includes('trim')) return 'crop'
   if (routeOperation.includes('brightness') || routeOperation.includes('exposure') || routeOperation.includes('highlights') || routeOperation.includes('shadows')) return 'brightness'
-  if (routeOperation.includes('contrast') || routeOperation.includes('gamma') || routeOperation.includes('detail')) return 'contrast'
+  if (routeOperation.includes('sharpen') || routeOperation.includes('detail')) return 'sharpen'
+  if (routeOperation.includes('contrast') || routeOperation.includes('gamma')) return 'contrast'
   if (routeOperation.includes('saturation') || routeOperation.includes('vibrance') || routeOperation.includes('color')) return 'saturation'
   if (routeOperation.includes('hue') || routeOperation.includes('tint') || routeOperation.includes('temperature')) return 'hue'
   if (routeOperation.includes('sepia') || routeOperation.includes('vintage') || routeOperation.includes('film') || routeOperation.includes('duotone')) return 'sepia'
   if (routeOperation.includes('invert')) return 'invert'
   if (routeOperation.includes('blur') || routeOperation.includes('noise') || routeOperation.includes('denoise')) return 'blur'
-  if (routeOperation.includes('pixel') || routeOperation.includes('poster')) return 'pixelate'
+  if (routeOperation.includes('poster')) return 'posterize'
+  if (routeOperation.includes('pixel')) return 'pixelate'
+  if (routeOperation.includes('grain')) return 'grain'
+  if (routeOperation.includes('edge')) return 'edge-detection'
+  if (routeOperation.includes('transparent') || routeOperation.includes('background')) return 'transparent'
   if (routeOperation.includes('grayscale') || routeOperation.includes('black-and-white') || routeOperation.includes('black-white')) return 'grayscale'
   if (routeOperation.includes('rotate')) return 'rotate'
   if (routeOperation.includes('resize') || routeOperation.includes('upscale') || routeOperation.includes('canvas')) return 'resize'

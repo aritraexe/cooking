@@ -2,6 +2,7 @@ import JSZip from 'jszip'
 import { useState } from 'react'
 import { FileDropzone } from '@/components/FileDropzone'
 import type { ImageOperation, TransformResponse } from '@/types'
+import { processBatch as runBatch } from '@/lib/batchEngine'
 
 function processFile(file: File, operation: ImageOperation, amount: number) {
   return new Promise<Blob>((resolve, reject) => {
@@ -30,11 +31,8 @@ export function BatchImagePage() {
     setStatus('working'); setError(null); setProgress(0)
     try {
       const zip = new JSZip()
-      for (let index = 0; index < files.length; index += 1) {
-        const output = await processFile(files[index], operation, amount)
-        zip.file(`${files[index].name.replace(/\.[^./]+$/, '')}-${operation}.webp`, output)
-        setProgress(Math.round(((index + 1) / files.length) * 100))
-      }
+      const outputs = await runBatch(files, (file) => processFile(file, operation, amount), (completed, total) => setProgress(Math.round((completed / total) * 100)), 2)
+      outputs.forEach((output, index) => zip.file(`${files[index].name.replace(/\.[^./]+$/, '')}-${operation}.webp`, output))
       const blob = await zip.generateAsync({ type: 'blob' })
       setDownloadUrl(URL.createObjectURL(blob)); setStatus('done')
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Batch processing failed locally.'); setStatus('error') }
