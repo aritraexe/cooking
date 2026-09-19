@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, ChevronRight, GripVertical, Plus, Search, Settings2, Trash2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { FILE_CATEGORIES, getOperationsFor, getQuickOperationsFor, operations } from '@/data/operations'
+import { useEffect, useMemo, useState } from 'react'
+import { FILE_CATEGORIES, getOperationsFor, getPopularOperationsFor, getQuickOperationsFor, operations } from '@/data/operations'
 import type { FileCategory, OperationMeta } from '@/types'
 
 interface WorkflowBuilderProps {
@@ -34,8 +34,20 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
   const [recentOperations, setRecentOperations] = useState<OperationMeta[]>([])
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
 
+  useEffect(() => {
+    const saved = localStorage.getItem('fluxtools-recent-operations')
+    if (!saved) return
+    try {
+      const ids = JSON.parse(saved) as string[]
+      setRecentOperations(ids.map((id) => operations.find((operation) => operation.id === id)).filter((operation): operation is OperationMeta => Boolean(operation)).slice(0, 3))
+    } catch {
+      localStorage.removeItem('fluxtools-recent-operations')
+    }
+  }, [])
+
   const availableOperations = getOperationsFor(family)
   const quickOperations = getQuickOperationsFor(family).slice(0, 4)
+  const popularOperations = getPopularOperationsFor(family).slice(0, 4)
   const normalizedSearch = search.trim().toLowerCase()
   const searchResults = useMemo(
     () => operations.filter((operation) => {
@@ -55,7 +67,11 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
 
   function addOperation(operation: OperationMeta) {
     setWorkflow((current) => [...current, operation])
-    setRecentOperations((current) => [operation, ...current.filter((item) => item.id !== operation.id)].slice(0, 3))
+    setRecentOperations((current) => {
+      const next = [operation, ...current.filter((item) => item.id !== operation.id)].slice(0, 3)
+      localStorage.setItem('fluxtools-recent-operations', JSON.stringify(next.map((item) => item.id)))
+      return next
+    })
     setSelectorOpen(false)
     setSearch('')
     setCategory(null)
@@ -181,7 +197,8 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
                   {categories.map((item) => <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${category === item ? 'border-accent/50 bg-accent/10 text-accent' : 'border-line text-ink-muted hover:text-ink'}`}>{item}</button>)}
                 </div>
               )}
-              {!search && family && recentOperations.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-medium text-ink-muted">Recently used</p><div className="flex flex-wrap gap-2">{recentOperations.map((operation) => <button key={operation.id} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted hover:border-accent/40 hover:text-accent">{operation.name}</button>)}</div></div>}
+              {!search && family && recentOperations.length > 0 && <div className="mb-5"><div className="mb-2 flex items-center justify-between gap-2"><p className="text-xs font-medium text-ink-muted">Recently used</p><button type="button" onClick={() => { setRecentOperations([]); localStorage.removeItem('fluxtools-recent-operations') }} className="text-[11px] text-ink-muted hover:text-ink">Clear local history</button></div><div className="flex flex-wrap gap-2">{recentOperations.map((operation) => <button key={operation.id} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted hover:border-accent/40 hover:text-accent">{operation.name}</button>)}</div></div>}
+              {!search && family && !category && popularOperations.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-medium text-ink-muted">Popular</p><div className="flex flex-wrap gap-2">{popularOperations.map((operation) => <button key={operation.id} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted hover:border-accent/40 hover:text-accent">{operation.name}</button>)}</div></div>}
               {!search && family && !category && suggestions.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-medium text-ink-muted">Suggested for this file</p><div className="flex flex-wrap gap-2">{suggestions.map((name) => { const operation = operations.find((item) => item.name === name); return operation ? <button key={name} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs text-accent hover:border-accent/50">{name}</button> : null })}</div></div>}
               <p className="mb-2 text-xs font-medium text-ink-muted">{search ? `${visibleOperations.length} results` : category ?? 'All modifications'}</p>
               <div className="space-y-2">{visibleOperations.map((operation) => <OperationButton key={operation.id} operation={operation} onClick={() => addOperation(operation)} />)}</div>

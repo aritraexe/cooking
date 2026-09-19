@@ -54,6 +54,7 @@ export function Home() {
           <p className="mx-auto mt-4 max-w-xl text-balance text-lg text-ink-muted">
             Upload a file, choose what to change, and build a clean workflow you can reuse.
           </p>
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1.5 text-xs text-accent">🔒 Processed locally in your browser</p>
         </div>
 
         <div className="mt-10">

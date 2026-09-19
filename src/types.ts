@@ -7,8 +7,11 @@ export type FileCategory =
   | 'spreadsheet'
   | 'text'
   | 'archive'
+  | 'utility'
 
 export type ToolFamily = 'image' | 'pdf'
+
+export type ProcessingMode = 'LOCAL' | 'LOCAL_HEAVY' | 'LOCAL_AI' | 'COMING_SOON_BACKEND'
 
 export type ToolStatus = 'active' | 'soon'
 
@@ -29,8 +32,17 @@ export interface OperationMeta {
   name: string
   description: string
   category: string
+  subcategory?: string
   family: FileCategory
   quick?: boolean
+  popular?: boolean
+  supportsBatch: boolean
+  supportsWorkflow: boolean
+  settings: string[]
+  processingMode: ProcessingMode
+  available: boolean
+  previewSupport: boolean
+  processor: string
   path?: string
 }
 
