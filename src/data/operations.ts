@@ -78,11 +78,11 @@ const TEXT_LOCAL_NAMES = new Set([
   'Edit text', 'Find and replace', 'Sort lines', 'Remove duplicate lines', 'Remove blank lines', 'Trim whitespace', 'Convert case', 'Line numbering',
   'Character count', 'Word count', 'Format JSON', 'Beautify JSON', 'Minify JSON', 'JSON to CSV', 'JSON to XML', 'JSON to YAML',
   'Format HTML', 'Beautify HTML', 'Minify HTML', 'Extract text from HTML', 'Remove HTML tags', 'Format XML', 'Beautify XML', 'Minify XML',
-  'XML to JSON', 'Compress or minify', 'Escape', 'Unescape', 'Encode', 'Decode', 'Validate JSON', 'Validate XML', 'Validate HTML', 'Syntax validation', 'Encoding conversion'
+  'XML to JSON', 'XML to CSV', 'Compress or minify', 'Escape', 'Unescape', 'Encode', 'Decode', 'Validate JSON', 'Validate XML', 'Validate HTML', 'Syntax validation', 'Encoding conversion'
 ])
 const DATA_LOCAL_NAMES = new Set([
   'Edit spreadsheet', 'Convert spreadsheet', 'Sort data', 'Filter data', 'Remove duplicates', 'Find and replace',
-  'Add rows', 'Delete rows', 'Add columns', 'Delete columns', 'Add sheet', 'Duplicate sheet', 'Find and replace', 'Sort', 'Filter', 'XLSX to CSV', 'CSV to XLSX', 'XLSX to JSON', 'XLSX to HTML',
+  'Add rows', 'Delete rows', 'Add columns', 'Delete columns', 'Add sheet', 'Delete sheet', 'Rename sheet', 'Duplicate sheet', 'Number format', 'Currency format', 'Percentage format', 'Date format', 'Find and replace', 'Sort', 'Filter', 'XLSX to CSV', 'CSV to XLSX', 'XLSX to JSON', 'XLSX to HTML',
   'Create ZIP', 'Extract ZIP', 'Create archive', 'Extract archive', 'Add files', 'Remove files', 'Replace files', 'Rename files', 'Compress archive', 'Recompress archive', 'Change compression level'
 ])
 const IMAGE_LOCAL_NAMES = new Set([
@@ -115,13 +115,231 @@ const OCR_LOCAL_NAMES = new Set(['Image to text'])
 const DOCUMENT_LOCAL_NAMES = new Set(['Edit document', 'Edit text', 'Find and replace', 'DOCX to TXT', 'DOCX to HTML', 'Convert document', 'Merge documents', 'Split document', 'Export PDF'])
 const UTILITY_LOCAL_NAMES = new Set([
   'Generate QR code', 'Decode QR code', 'Scan QR from image', 'Resize QR code', 'Change QR colors', 'Set error correction', 'Generate barcode',
-  'Decode barcode', 'HEX to RGB', 'RGB to HSL', 'RGB to CMYK', 'Contrast checker', 'Color picker', 'Palette extraction', 'Generate palette', 'Extract colors from image',
+  'Decode barcode', 'HEX to RGB', 'RGB to HSL', 'RGB to CMYK', 'Contrast checker', 'Color picker', 'Palette extraction', 'Generate palette', 'Extract colors from image', 'Gradient generator', 'Gradient editor', 'Random palette generator',
   'Rename file', 'Batch rename', 'Change extension', 'Add prefix', 'Add suffix', 'Sequential numbering', 'Find and replace filename', 'Remove special characters', 'Spaces to underscores', 'Spaces to hyphens', 'Lowercase filename', 'Uppercase filename', 'Download results as ZIP'
 ])
 const BACKEND_REQUIRED_NAMES = new Set([
   'Save reusable signature',
   'Apply workflow to batch',
 ])
+
+const ROUTE_PATHS: Partial<Record<FileCategory, Record<string, string>>> = {
+  image: {
+    'Compress image': 'image/compress-image',
+    'Resize image': 'image/resize-image',
+    Resize: 'image/resize',
+    'Rotate image': 'image/rotate-image',
+    Rotate: 'image/rotate',
+    'Flip image': 'image/flip-image',
+    'Flip horizontal': 'image/flip',
+    'Flip vertical': 'image/flip',
+    Grayscale: 'image/grayscale',
+    'Convert image': 'image/convert',
+    'Crop image': 'image/crop',
+    Crop: 'image/crop',
+    Brightness: 'image/brightness',
+    Contrast: 'image/contrast',
+    Sepia: 'image/sepia',
+    'Invert colors': 'image/invert',
+    Blur: 'image/blur',
+    Pixelate: 'image/pixelate',
+    Saturation: 'image/saturation',
+    Hue: 'image/hue',
+    Vintage: 'image/vintage',
+    Vignette: 'image/vignette',
+    'Black & white': 'image/grayscale',
+    'Convert to WebP': 'image/convert',
+    'Make transparent': 'image/transparent',
+    'Transparent background': 'image/transparent',
+    'Change aspect ratio': 'image/resize',
+    'Fit to dimensions': 'image/resize',
+    'Fill dimensions': 'image/resize',
+  },
+  pdf: {
+    'Merge PDFs': 'pdf/merge-pdf',
+    'Split PDF': 'pdf/split-pdf',
+    'Extract Pages': 'pdf/extract-pages-pdf',
+    'Rotate Pages': 'pdf/rotate-pages-pdf',
+    'Images to PDF': 'pdf/images-to-pdf',
+    'Delete Pages': 'pdf/delete-pages',
+    'Duplicate page': 'pdf/duplicate-page',
+    'Reverse page order': 'pdf/reverse-page-order',
+    'Add blank page': 'pdf/add-blank-page',
+    'Reorder pages': 'pdf/reorder-pages',
+    'Add text': 'pdf/add-text',
+    'Add watermark': 'pdf/add-watermark',
+    'Text watermark': 'pdf/text-watermark',
+    'Image watermark': 'pdf/image-watermark',
+    'Logo watermark': 'pdf/logo-watermark',
+    'Page numbers': 'pdf/page-numbers',
+    'View metadata': 'pdf/view-metadata',
+    'Edit metadata': 'pdf/edit-metadata',
+    'Remove metadata': 'pdf/remove-metadata',
+    'Add metadata': 'pdf/add-metadata',
+    'Set title': 'pdf/title',
+    'Set author': 'pdf/author',
+    'Set subject': 'pdf/subject',
+    'Set keywords': 'pdf/keywords',
+    Highlight: 'pdf/highlight',
+    Underline: 'pdf/underline',
+    Strikethrough: 'pdf/strikethrough',
+    'Text annotation': 'pdf/text-annotation',
+    Signature: 'pdf/signature',
+    Initials: 'pdf/initials',
+    'Add date': 'pdf/date',
+    'Add checkmark': 'pdf/checkmark',
+    'Add cross': 'pdf/cross',
+    'Add stamp': 'pdf/stamp',
+  },
+  video: {
+    'Trim video': 'media/trim-video',
+    'Cut video': 'media/cut',
+    Trim: 'media/trim',
+    Cut: 'media/cut',
+    Split: 'media/split',
+    Reverse: 'media/reverse',
+    'Change playback speed': 'media/change-playback-speed',
+    'Compress video': 'media/compress-video',
+    'Convert video': 'media/convert-video',
+    'Extract audio': 'media/extract-audio',
+    'Remove audio': 'media/remove-audio',
+  },
+  audio: {
+    'Trim audio': 'media/trim-audio',
+    'Convert audio': 'media/convert-audio',
+    'Compress audio': 'media/compress-audio',
+    'Change speed': 'media/change-speed',
+    'Pitch shift': 'media/pitch-shift',
+    'Noise reduction': 'media/noise-reduction',
+    Equalization: 'media/equalization',
+    'Change bitrate': 'media/change-bitrate',
+    'Change sample rate': 'media/change-sample-rate',
+    'Mono to stereo': 'media/mono-to-stereo',
+    'Stereo to mono': 'media/stereo-to-mono',
+    MP3: 'media/mp3',
+    WAV: 'media/wav',
+    FLAC: 'media/flac',
+    OGG: 'media/ogg',
+    AAC: 'media/aac',
+    'Adjust volume': 'media/adjust-volume',
+    'Volume adjustment': 'media/volume-adjustment',
+    'Fade in': 'media/fade-in',
+    'Fade out': 'media/fade-out',
+    Normalize: 'media/normalize',
+    'Remove silence': 'media/remove-silence',
+  },
+  text: {
+    'Edit text': 'text/edit-text',
+    'Find and replace': 'text/find-and-replace',
+    'Sort lines': 'text/sort-lines',
+    'Remove duplicate lines': 'text/remove-duplicate-lines',
+    'Remove blank lines': 'text/remove-blank-lines',
+    'Trim whitespace': 'text/trim-whitespace',
+    'Convert case': 'text/convert-case',
+    'Line numbering': 'text/line-numbering',
+    'Character count': 'text/character-count',
+    'Word count': 'text/word-count',
+    'Encoding conversion': 'text/encoding-conversion',
+    Escape: 'text/escape',
+    Unescape: 'text/unescape',
+    Encode: 'text/encode',
+    Decode: 'text/decode',
+    'Compress or minify': 'text/compress-or-minify',
+    'Syntax validation': 'text/syntax-validation',
+    'Validate JSON': 'text/validate-json',
+    'Validate XML': 'text/validate-xml',
+    'Validate HTML': 'text/validate-html',
+    'Format JSON': 'text/format-json',
+    'Beautify JSON': 'text/beautify-json',
+    'Minify JSON': 'text/minify-json',
+    'JSON to CSV': 'text/json-to-csv',
+    'JSON to XML': 'text/json-to-xml',
+    'Format HTML': 'text/format-html',
+    'Beautify HTML': 'text/beautify-html',
+    'Minify HTML': 'text/minify-html',
+    'Extract text from HTML': 'text/extract-text-from-html',
+    'Remove HTML tags': 'text/remove-html-tags',
+    'Format XML': 'text/format-xml',
+    'Beautify XML': 'text/beautify-xml',
+    'Minify XML': 'text/minify-xml',
+    'XML to JSON': 'text/xml-to-json',
+    'XML to CSV': 'text/xml-to-csv',
+  },
+  spreadsheet: {
+    'Edit spreadsheet': 'data/edit-spreadsheet',
+    'Convert spreadsheet': 'data/convert-spreadsheet',
+    'Sort data': 'data/sort-data',
+    'Filter data': 'data/filter-data',
+    'Remove duplicates': 'data/remove-duplicates',
+    'Find and replace': 'data/find-and-replace',
+    'Add rows': 'data/add-rows',
+    'Delete rows': 'data/delete-rows',
+    'Add columns': 'data/add-columns',
+    'Delete columns': 'data/delete-columns',
+    'Add sheet': 'data/add-sheet',
+    'Delete sheet': 'data/delete-sheet',
+    'Rename sheet': 'data/rename-sheet',
+    'Duplicate sheet': 'data/duplicate-sheet',
+    'Number format': 'data/number-format',
+    'Currency format': 'data/currency-format',
+    'Percentage format': 'data/percentage-format',
+    'Date format': 'data/date-format',
+    'XLSX to CSV': 'data/xlsx-to-csv',
+    'CSV to XLSX': 'data/csv-to-xlsx',
+    'XLSX to JSON': 'data/xlsx-to-json',
+    'XLSX to HTML': 'data/xlsx-to-html',
+  },
+  archive: {
+    'Create archive': 'data/create-archive',
+    'Extract archive': 'data/extract-archive',
+    'Add files': 'data/add-files',
+    'Remove files': 'data/remove-files',
+    'Replace files': 'data/replace-files',
+    'Rename files': 'data/rename-files',
+    'Compress archive': 'data/compress-archive',
+    'Recompress archive': 'data/recompress-archive',
+    'Change compression level': 'data/change-compression-level',
+  },
+  document: {
+    'Edit document': 'document/edit-document',
+    'Convert document': 'document/convert-document',
+    'Merge documents': 'document/merge-documents',
+    'Split document': 'document/split-document',
+    'DOCX to TXT': 'document/docx-to-txt',
+    'DOCX to HTML': 'document/docx-to-html',
+  },
+  utility: {
+    'Generate QR code': 'utility/generate-qr-code',
+    'Decode QR code': 'utility/decode-qr-code',
+    'Scan QR from image': 'utility/decode-qr-code',
+    'Change QR colors': 'utility/generate-qr-code',
+    'Generate palette': 'utility/generate-palette',
+    'Palette extraction': 'utility/palette-extraction',
+    'Extract colors from image': 'utility/extract-colors-from-image',
+    'Gradient generator': 'utility/gradient-generator',
+    'Gradient editor': 'utility/gradient-generator',
+    'Random palette generator': 'utility/random-palette-generator',
+    'HEX to RGB': 'utility/hex-to-rgb',
+    'RGB to HSL': 'utility/rgb-to-hsl',
+    'RGB to CMYK': 'utility/rgb-to-cmyk',
+    'Contrast checker': 'utility/contrast-checker',
+    'Color picker': 'utility/color-picker',
+    'Rename file': 'utility/rename-file',
+    'Batch rename': 'utility/batch-rename',
+    'Change extension': 'utility/change-extension',
+    'Add prefix': 'utility/add-prefix',
+    'Add suffix': 'utility/add-suffix',
+    'Sequential numbering': 'utility/sequential-numbering',
+    'Date-based naming': 'utility/date-based-naming',
+    'Find and replace filename': 'utility/find-and-replace-filename',
+    'Remove special characters': 'utility/remove-special-characters',
+    'Spaces to underscores': 'utility/spaces-to-underscores',
+    'Spaces to hyphens': 'utility/spaces-to-hyphens',
+    'Lowercase filename': 'utility/lowercase-filename',
+    'Uppercase filename': 'utility/uppercase-filename',
+    'Download results as ZIP': 'utility/download-results-as-zip',
+  },
+}
 
 // Keep this map aligned with App.tsx: an operation is available only when a real route and processor exist.
 export const IMPLEMENTED_PROCESSORS: Record<string, string> = {
@@ -194,27 +412,30 @@ function buildRegistry(): OperationMeta[] {
                       : name === 'Rotate Pages' ? 'rotate-pages-pdf'
                         : name === 'Images to PDF' ? 'images-to-pdf'
                           : undefined
+    const specificRoute = ROUTE_PATHS[family]?.[name]
     const path = operationKey && IMPLEMENTED_PROCESSORS[operationKey]
       ? IMPLEMENTED_PROCESSORS[operationKey]
-      : family === 'text' && TEXT_LOCAL_NAMES.has(name)
-        ? `text/${slug(name)}`
-        : family === 'spreadsheet' && DATA_LOCAL_NAMES.has(name)
-          ? `data/${slug(name)}`
-          : family === 'archive' && DATA_LOCAL_NAMES.has(name)
+      : specificRoute
+        ? specificRoute
+        : family === 'text' && TEXT_LOCAL_NAMES.has(name)
+          ? `text/${slug(name)}`
+          : family === 'spreadsheet' && DATA_LOCAL_NAMES.has(name)
             ? `data/${slug(name)}`
-            : family === 'pdf' && PDF_LOCAL_NAMES.has(name)
-              ? `pdf/${slug(name)}`
-              : MEDIA_LOCAL_NAMES.has(name)
-                ? `media/${slug(name)}`
-                : OCR_LOCAL_NAMES.has(name)
-                  ? 'ocr'
-                  : family === 'document' && DOCUMENT_LOCAL_NAMES.has(name)
-                    ? `document/${slug(name)}`
-                    : family === 'utility' && UTILITY_LOCAL_NAMES.has(name)
-                      ? `utility/${slug(name)}`
-                      : family === 'image' && IMAGE_LOCAL_NAMES.has(name)
-                        ? `image/${slug(name)}`
-                        : undefined
+            : family === 'archive' && DATA_LOCAL_NAMES.has(name)
+              ? `data/${slug(name)}`
+              : family === 'pdf' && PDF_LOCAL_NAMES.has(name)
+                ? `pdf/${slug(name)}`
+                : MEDIA_LOCAL_NAMES.has(name)
+                  ? `media/${slug(name)}`
+                  : OCR_LOCAL_NAMES.has(name)
+                    ? 'ocr'
+                    : family === 'document' && DOCUMENT_LOCAL_NAMES.has(name)
+                      ? `document/${slug(name)}`
+                      : family === 'utility' && UTILITY_LOCAL_NAMES.has(name)
+                        ? `utility/${slug(name)}`
+                        : family === 'image' && IMAGE_LOCAL_NAMES.has(name)
+                          ? `image/${slug(name)}`
+                          : undefined
     const available = Boolean(path)
     const backendRequired = category === 'AI' || BACKEND_REQUIRED_NAMES.has(name)
     const status = available

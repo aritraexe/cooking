@@ -58,6 +58,12 @@ function transformText(value: string, operation: string) {
     const normalized = value.replace(/<\/?[A-Za-z0-9_-]+>/g, '').trim()
     return JSON.stringify({ raw: normalized }, null, 2)
   }
+  if (operation.includes('xml-to-csv')) {
+    const document = new DOMParser().parseFromString(value, 'application/xml')
+    if (document.querySelector('parsererror')) return 'Invalid XML document.'
+    const rows = Array.from(document.documentElement.children).map((node) => Array.from(node.children).map((child) => child.textContent ?? '').join(','))
+    return rows.join('\n')
+  }
   if (operation.includes('beautify') || operation.includes('format') || operation.includes('validate')) {
     try { return JSON.stringify(JSON.parse(value), null, 2) } catch { return value.split('\n').map((line) => line.trim()).join('\n') }
   }

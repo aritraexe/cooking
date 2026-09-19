@@ -63,6 +63,40 @@ function updateCells(rows: Rows, callback: (cell: Cell) => Cell): Rows {
   return rows.map((row) => row.map(callback))
 }
 
+function promptSheetName(workbook: XLSX.WorkBook, message: string) {
+  const name = window.prompt(`${message} (${workbook.SheetNames.join(', ')}):`, workbook.SheetNames[0])?.trim() ?? ''
+  if (!name || !workbook.Sheets[name]) throw new Error('Select an existing sheet.')
+  return name
+}
+
+function validateSheetName(workbook: XLSX.WorkBook, name: string, currentName?: string) {
+  if (!name) throw new Error('A sheet name is required.')
+  if (name.length > 31 || /[:\\/?*[\]]/.test(name)) throw new Error('Sheet names must be 1-31 characters and cannot contain : \\ / ? * [ or ].')
+  if (name !== currentName && workbook.SheetNames.includes(name)) throw new Error('A sheet with that name already exists.')
+}
+
+function promptCellRange(sheet: XLSX.WorkSheet) {
+  const requested = window.prompt('Cell range to format (for example A1:C10):', sheet['!ref'] ?? 'A1')?.trim().toUpperCase() ?? ''
+  if (!/^[A-Z]+[1-9]\d*(?::[A-Z]+[1-9]\d*)?$/.test(requested)) throw new Error('Enter a valid cell range such as A1:C10.')
+  const range = XLSX.utils.decode_range(requested)
+  const sheetRange = sheet['!ref'] ? XLSX.utils.decode_range(sheet['!ref']) : null
+  if (sheetRange && (range.s.r < sheetRange.s.r || range.s.c < sheetRange.s.c || range.e.r > sheetRange.e.r || range.e.c > sheetRange.e.c)) {
+    throw new Error('The formatting range must be inside the used cells of the sheet.')
+  }
+  return range
+}
+
+function applyNumberFormat(sheet: XLSX.WorkSheet, format: string) {
+  const range = promptCellRange(sheet)
+  for (let row = range.s.r; row <= range.e.r; row += 1) {
+    for (let column = range.s.c; column <= range.e.c; column += 1) {
+      const address = XLSX.utils.encode_cell({ r: row, c: column })
+      const cell = sheet[address]
+      if (cell) cell.z = format
+    }
+  }
+}
+
 export function DataOperationPage() {
   const { operation = 'edit-spreadsheet' } = useParams()
   const [files, setFiles] = useState<File[]>([])
@@ -172,6 +206,28 @@ export function DataOperationPage() {
         const nextSheetName = uniqueSheetName(workbook, window.prompt('New sheet name:', `${sourceName} copy`) ?? '')
         workbook.SheetNames.push(nextSheetName)
         workbook.Sheets[nextSheetName] = XLSX.utils.aoa_to_sheet(sheetRows(workbook, sourceName))
+      } else if (operation.includes('delete-sheet')) {
+        if (workbook.SheetNames.length === 1) throw new Error('A workbook must keep at least one sheet.')
+        const sheetName = promptSheetName(workbook, 'Sheet to delete')
+        delete workbook.Sheets[sheetName]
+        workbook.SheetNames = workbook.SheetNames.filter((name) => name !== sheetName)
+        rows = sheetRows(workbook)
+      } else if (operation.includes('rename-sheet')) {
+        const currentName = promptSheetName(workbook, 'Sheet to rename')
+        const nextName = window.prompt('New sheet name:', currentName)?.trim() ?? ''
+        validateSheetName(workbook, nextName, currentName)
+        workbook.Sheets[nextName] = workbook.Sheets[currentName]
+        delete workbook.Sheets[currentName]
+        workbook.SheetNames = workbook.SheetNames.map((name) => name === currentName ? nextName : name)
+        rows = sheetRows(workbook, nextName)
+      } else if (operation.includes('number-format') || operation.includes('currency-format') || operation.includes('percentage-format') || operation.includes('date-format')) {
+        const sheetName = promptSheetName(workbook, 'Sheet to format')
+        const format = operation.includes('currency-format') ? '$#,##0.00'
+          : operation.includes('percentage-format') ? '0.00%'
+            : operation.includes('date-format') ? 'yyyy-mm-dd'
+              : window.prompt('Excel number format:', '0.00')?.trim() ?? ''
+        if (!format) throw new Error('A number format is required.')
+        applyNumberFormat(workbook.Sheets[sheetName], format)
       }
 
       if (operation.includes('xlsx-to-json') || operation.includes('csv-to-json')) {

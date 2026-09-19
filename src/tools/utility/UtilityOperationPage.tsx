@@ -40,6 +40,7 @@ export function UtilityOperationPage() {
   const isFileManagement = ['rename-file', 'batch-rename', 'change-extension', 'add-prefix', 'add-suffix', 'sequential-numbering', 'remove-special-characters', 'spaces-to-underscores', 'spaces-to-hyphens', 'lowercase-filename', 'uppercase-filename', 'download-results-as-zip', 'find-and-replace-filename'].some((name) => operation.includes(name))
   const [files, setFiles] = useState<File[]>([])
   const [fileResult, setFileResult] = useState<{ url: string; name: string } | null>(null)
+  const [designResult, setDesignResult] = useState<string>('')
 
   async function processFileNames() {
     if (!files.length) return
@@ -53,6 +54,14 @@ export function UtilityOperationPage() {
   }
 
   if (isFileManagement) return <div className="mx-auto max-w-2xl px-6 py-16"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Local file utility</p><h1 className="mt-2 font-display text-3xl font-semibold text-ink">{title}</h1><p className="mt-2 text-ink-muted">Transform filenames locally and export the results as a ZIP archive.</p><div className="mt-8"><FileDropzone accept="*/*" hint="Select files to rename locally" multiple onFile={(file) => setFiles([file])} onFiles={setFiles} /></div>{files.length > 0 && <div className="mt-5 space-y-4"><p className="text-sm text-ink-muted">{files.length} file{files.length === 1 ? '' : 's'} selected</p><button type="button" onClick={processFileNames} className="w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-page">Process filenames locally</button>{fileResult && <a href={fileResult.url} download={fileResult.name} className="block rounded-lg border border-line py-2.5 text-center text-sm text-ink">Download ZIP</a>}</div>}</div>
+
+  const isDesignUtility = operation.includes('gradient') || operation.includes('random-palette')
+  function generateDesign() {
+    const colors = Array.from({ length: 3 }, () => `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`)
+    setDesignResult(operation.includes('gradient') ? `background: linear-gradient(135deg, ${colors.join(', ')});` : colors.join('\n'))
+  }
+
+  if (isDesignUtility) return <div className="mx-auto max-w-2xl px-6 py-16"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Local color utility</p><h1 className="mt-2 font-display text-3xl font-semibold text-ink">{title}</h1><p className="mt-2 text-ink-muted">Generate deterministic design output locally in your browser.</p><button type="button" onClick={generateDesign} className="mt-8 w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-page">Generate locally</button>{designResult && <><textarea value={designResult} onChange={(event) => setDesignResult(event.target.value)} className="mt-4 min-h-32 w-full rounded-xl border border-line bg-page p-4 font-mono text-sm text-ink" /><a href={`data:text/plain;charset=utf-8,${encodeURIComponent(designResult)}`} download={`${operation}.txt`} className="mt-3 block rounded-lg border border-line py-2.5 text-center text-sm text-ink">Download result</a></>}</div>
 
   async function generate() {
     const canvas = canvasRef.current
