@@ -1,3 +1,13 @@
+export type FileCategory =
+  | 'pdf'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'document'
+  | 'spreadsheet'
+  | 'text'
+  | 'archive'
+
 export type ToolFamily = 'image' | 'pdf'
 
 export type ToolStatus = 'active' | 'soon'
@@ -12,6 +22,16 @@ export interface ToolMeta {
   /** Route path, relative to /tools/. Empty for not-yet-built tools. */
   path: string
   status: ToolStatus
+}
+
+export interface OperationMeta {
+  id: string
+  name: string
+  description: string
+  category: string
+  family: FileCategory
+  quick?: boolean
+  path?: string
 }
 
 export type OutputFormat = 'image/jpeg' | 'image/webp' | 'image/png'

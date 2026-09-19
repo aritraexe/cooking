@@ -6,18 +6,23 @@ interface FileDropzoneProps {
   accept: string
   hint: string
   onFile: (file: File) => void
+  onFiles?: (files: File[]) => void
+  multiple?: boolean
 }
 
-export function FileDropzone({ accept, hint, onFile }: FileDropzoneProps) {
+export function FileDropzone({ accept, hint, onFile, onFiles, multiple = false }: FileDropzoneProps) {
   const [isDragging, setIsDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
+      if (onFiles && files?.length) {
+        onFiles(Array.from(files))
+      }
       const file = files?.[0]
       if (file) onFile(file)
     },
-    [onFile],
+    [onFile, onFiles],
   )
 
   return (
@@ -53,6 +58,7 @@ export function FileDropzone({ accept, hint, onFile }: FileDropzoneProps) {
         ref={inputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         className="hidden"
         onChange={(event) => handleFiles(event.target.files)}
       />

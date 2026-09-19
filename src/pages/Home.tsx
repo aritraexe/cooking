@@ -1,124 +1,104 @@
+import { Layers3, Upload, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileDropzone } from '@/components/FileDropzone'
-import { ToolCard } from '@/components/ToolCard'
-import { getActiveToolsFor, tools } from '@/data/tools'
-import type { ToolFamily, ToolMeta } from '@/types'
+import { WorkflowBuilder } from '@/components/WorkflowBuilder'
+import { FILE_CATEGORIES } from '@/data/operations'
+import type { FileCategory, OperationMeta } from '@/types'
 
 const VALUE_PROPS = [
-  {
-    title: '100% in your browser',
-    body: 'Every file is processed on your device. Nothing is ever uploaded.',
-  },
-  {
-    title: 'No ads, ever',
-    body: 'Just the tools you came for — no banners, no tracking, no clutter.',
-  },
-  {
-    title: 'Free, no account needed',
-    body: 'Open a tool and start. No sign-up, no paywall.',
-  },
+  ['Private by default', 'Every file is processed on your device. Nothing is ever uploaded.'],
+  ['One workflow', 'Chain simple modifications together instead of starting over for every task.'],
+  ['Built to grow', 'The right operation appears when you need it, without a wall of tools.'],
 ]
 
-function detectFamily(file: File): ToolFamily | null {
-  if (file.type === 'application/pdf') return 'pdf'
+function detectCategory(file: File): FileCategory | null {
+  if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) return 'pdf'
   if (file.type.startsWith('image/')) return 'image'
+  if (file.type.startsWith('video/')) return 'video'
+  if (file.type.startsWith('audio/')) return 'audio'
+  if (file.type.includes('spreadsheet') || /\.(csv|xls|xlsx)$/i.test(file.name)) return 'spreadsheet'
+  if (file.type.includes('word') || file.type.includes('document')) return 'document'
+  if (file.type.startsWith('text/')) return 'text'
+  if (/\.(zip|tar|gz|rar|7z)$/i.test(file.name)) return 'archive'
   return null
 }
 
 export function Home() {
   const navigate = useNavigate()
-  const [heroFile, setHeroFile] = useState<File | null>(null)
-  const [choices, setChoices] = useState<ToolMeta[] | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [family, setFamily] = useState<FileCategory | null>(null)
+  const [selectedOperation, setSelectedOperation] = useState<OperationMeta | null>(null)
 
-  const handleHeroFile = useCallback(
-    (file: File) => {
-      const family = detectFamily(file)
-      const applicable = family ? getActiveToolsFor(family) : []
+  const handleFiles = useCallback((incoming: File[]) => {
+    setFiles(incoming)
+    setFamily(detectCategory(incoming[0]))
+    setSelectedOperation(null)
+  }, [])
 
-      if (applicable.length === 1) {
-        navigate(`/tools/${applicable[0].path}`, { state: { file } })
-        return
-      }
+  function openOperation(operation: OperationMeta) {
+    setSelectedOperation(operation)
+    if (operation.path && files.length === 1) {
+      navigate(`/tools/${operation.path}`, { state: { file: files[0] } })
+    }
+  }
 
-      setHeroFile(file)
-      setChoices(applicable)
-    },
-    [navigate],
-  )
-
-  const imageTools = tools.filter((t) => t.family === 'image')
-  const pdfTools = tools.filter((t) => t.family === 'pdf')
+  const categoryLabel = FILE_CATEGORIES.find((item) => item.id === family)?.label
 
   return (
     <div>
-      <section className="mx-auto max-w-3xl px-6 pb-16 pt-16 text-center sm:pt-24">
-        <h1 className="ff-hero-title text-balance text-4xl sm:text-5xl">
-          Every PDF and image tool, in one place.
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-balance text-lg text-ink-muted">
-          Compress, resize, convert, and more — all of it runs right here in your browser.
-          Nothing you drop below is ever uploaded.
-        </p>
+      <section className="mx-auto max-w-3xl px-6 pb-16 pt-16 sm:pt-24">
+        <div className="text-center">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent">Your file workspace</p>
+          <h1 className="ff-hero-title text-balance text-4xl sm:text-5xl">Make every file work harder.</h1>
+          <p className="mx-auto mt-4 max-w-xl text-balance text-lg text-ink-muted">
+            Upload a file, choose what to change, and build a clean workflow you can reuse.
+          </p>
+        </div>
 
         <div className="mt-10">
           <FileDropzone
-            accept="image/*,application/pdf"
-            hint="Any PDF or image file"
-            onFile={handleHeroFile}
+            accept="*/*"
+            hint="PDF, image, video, audio, document, spreadsheet, text, or archive"
+            multiple
+            onFile={() => undefined}
+            onFiles={handleFiles}
           />
         </div>
 
-        {heroFile && choices && choices.length > 0 && (
+        {files.length > 0 && (
           <div className="ff-card mt-4 rounded-xl border p-4 text-left">
-            <p className="text-sm text-ink-muted">
-              What would you like to do with <span className="text-ink">{heroFile.name}</span>?
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {choices.map((tool) => (
-                <button
-                  key={tool.id}
-                  type="button"
-                  onClick={() => navigate(`/tools/${tool.path}`, { state: { file: heroFile } })}
-                  className="ff-control rounded-lg border px-3 py-1.5 text-sm font-medium text-ink transition-colors hover:border-accent/50 hover:text-accent"
-                >
-                  {tool.name}
-                </button>
-              ))}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="rounded-lg bg-accent/10 p-2 text-accent"><Layers3 className="h-4 w-4" aria-hidden="true" /></div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink">{files.length} {files.length === 1 ? 'file' : 'files'} ready</p>
+                  <p className="mt-0.5 truncate text-xs text-ink-muted">{files[0].name}{files.length > 1 ? ` and ${files.length - 1} more` : ''}</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => { setFiles([]); setFamily(null); setSelectedOperation(null) }} aria-label="Clear uploaded files" className="rounded-lg p-2 text-ink-muted hover:bg-page hover:text-ink"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <span className="rounded-full border border-accent/30 bg-accent/5 px-2.5 py-1 font-medium text-accent">{categoryLabel ?? 'File type not detected'}</span>
+              {files.length > 1 && <span className="rounded-full border border-line px-2.5 py-1 text-ink-muted">Batch workflow</span>}
             </div>
           </div>
         )}
 
-        {heroFile && choices && choices.length === 0 && (
-          <div className="ff-card mt-4 rounded-xl border p-4 text-left text-sm text-ink-muted">
-            Tools for that file type are still on the way — see what's live below.
+        {selectedOperation && !selectedOperation.path && (
+          <div className="ff-card mt-4 rounded-xl border p-4 text-left">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-accent/10 p-2 text-accent"><Upload className="h-4 w-4" aria-hidden="true" /></div>
+              <div><p className="text-sm font-medium text-ink">{selectedOperation.name} is ready to configure</p><p className="mt-1 text-sm text-ink-muted">This operation has been added to the platform catalog and will open its settings when that processor is available.</p></div>
+            </div>
           </div>
         )}
+
+        <WorkflowBuilder family={family} hasFiles={files.length > 0} onFamilyChange={setFamily} onOpenOperation={openOperation} />
 
         <dl className="mt-16 grid gap-8 text-left sm:grid-cols-3 sm:gap-6">
-          {VALUE_PROPS.map((item) => (
-            <div key={item.title} className="border-t border-line pt-4">
-              <dt className="font-display text-sm font-medium text-ink">{item.title}</dt>
-              <dd className="mt-1 text-sm leading-relaxed text-ink-muted">{item.body}</dd>
-            </div>
-          ))}
+          {VALUE_PROPS.map(([title, body]) => <div key={title} className="border-t border-line pt-4"><dt className="font-display text-sm font-medium text-ink">{title}</dt><dd className="mt-1 text-sm leading-relaxed text-ink-muted">{body}</dd></div>)}
         </dl>
-      </section>
-
-      <section id="all-tools" className="mx-auto max-w-5xl scroll-mt-8 px-6 pb-24">
-        <h2 className="font-display text-xl font-semibold text-ink">Image tools</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {imageTools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} />
-          ))}
-        </div>
-
-        <h2 className="mt-14 font-display text-xl font-semibold text-ink">PDF tools</h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pdfTools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} />
-          ))}
-        </div>
       </section>
     </div>
   )
