@@ -16,9 +16,14 @@ export function Footer() {
             href="https://www.x3non.xyz"
             target="_blank"
             rel="noreferrer"
-            className="relative inline-block underline decoration-transparent underline-offset-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:rotate-1 hover:skew-x-[-8deg] hover:scale-105 hover:text-ink-muted hover:tracking-[0.04em] hover:decoration-current hover:decoration-2 hover:opacity-70 hover:drop-shadow-[0_0_8px_currentColor] hover:drop-shadow-[3px_3px_0_currentColor] active:translate-y-0 active:scale-95"
+            aria-label="Crafted By Xenon (opens in a new tab)"
+            title="Opens in a new tab"
+            className="relative inline-block underline decoration-current underline-offset-4 transition-all duration-300 ease-out hover:-translate-y-1 hover:rotate-1 hover:skew-x-[-8deg] hover:scale-105 hover:text-ink-muted hover:tracking-[0.04em] hover:decoration-2 hover:opacity-70 hover:drop-shadow-[0_0_8px_currentColor] hover:drop-shadow-[3px_3px_0_currentColor] active:translate-y-0 active:scale-95"
           >
-            Crafted By Xenon
+            Crafted By Xenon{' '}
+            <span aria-hidden="true" className="inline-block transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+              ↗
+            </span>
           </a>
         </p>
         <p className="mt-1.5 max-w-md text-sm text-ink-muted">
