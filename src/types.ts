@@ -12,6 +12,7 @@ export type FileCategory =
 export type ToolFamily = 'image' | 'pdf'
 
 export type ProcessingMode = 'LOCAL' | 'LOCAL_HEAVY' | 'LOCAL_AI' | 'COMING_SOON_BACKEND'
+export type OperationStatus = 'AVAILABLE' | 'COMING_SOON'
 
 export type ToolStatus = 'active' | 'soon'
 
@@ -43,17 +44,22 @@ export interface OperationMeta {
   available: boolean
   previewSupport: boolean
   processor: string
+  status: OperationStatus
   path?: string
 }
 
 export type OutputFormat = 'image/jpeg' | 'image/webp' | 'image/png'
 
+export type ImageOperation = 'resize' | 'compress' | 'rotate' | 'flip-horizontal' | 'flip-vertical' | 'grayscale' | 'convert' | 'crop' | 'brightness' | 'contrast' | 'sepia' | 'invert' | 'blur' | 'pixelate' | 'saturation' | 'hue' | 'vintage' | 'vignette'
+
 export interface TransformRequest {
   file: File
+  operation?: ImageOperation
   width?: number
   height?: number
   format: OutputFormat
   quality: number
+  amount?: number
 }
 
 export interface TransformSuccess {

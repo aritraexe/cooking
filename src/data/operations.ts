@@ -74,6 +74,56 @@ const blocks: RegistryBlock[] = [
 
 const quickNames = new Set(['Compress PDF', 'Merge PDFs', 'Split PDF', 'OCR PDF', 'Add Signature', 'Add Watermark', 'Password Protect', 'Resize image', 'Crop image', 'Compress image', 'Remove background', 'Enhance image', 'Trim video', 'Compress video', 'Convert video', 'Extract audio', 'Trim audio', 'Convert audio', 'Edit document', 'Convert document', 'Edit spreadsheet', 'Convert spreadsheet'])
 const popularNames = new Set(['Compress PDF', 'Merge PDFs', 'Split PDF', 'OCR PDF', 'Resize image', 'Compress image', 'Convert image', 'Remove background', 'Convert to WebP', 'Trim video', 'Compress video', 'Extract audio', 'Convert audio', 'Export PDF', 'Find and replace', 'Remove duplicates', 'Format JSON', 'Extract archive', 'Batch rename archive contents'])
+const TEXT_LOCAL_NAMES = new Set(['Edit text', 'Find and replace', 'Sort lines', 'Remove duplicate lines', 'Remove blank lines', 'Trim whitespace', 'Convert case', 'Line numbering', 'Character count', 'Word count', 'Format JSON', 'Beautify JSON', 'Minify JSON', 'Format HTML', 'Beautify HTML', 'Minify HTML', 'Extract text from HTML', 'Remove HTML tags', 'Format XML', 'Beautify XML', 'Minify XML', 'Compress or minify', 'Escape', 'Unescape'])
+const DATA_LOCAL_NAMES = new Set(['Edit spreadsheet', 'Convert spreadsheet', 'Remove duplicates', 'XLSX to CSV', 'CSV to XLSX', 'Create ZIP', 'Extract ZIP'])
+const IMAGE_LOCAL_NAMES = new Set([
+  'Crop', 'Resize', 'Rotate', 'Flip horizontal', 'Flip vertical', 'Straighten',
+  'Canvas resize', 'Canvas expansion', 'Trim empty space', 'Trim transparent space',
+  'Brightness', 'Contrast', 'Exposure', 'Temperature', 'Tint', 'Hue', 'Vibrance',
+  'Gamma', 'Shadows', 'Highlights', 'Blacks', 'Whites', 'Grayscale', 'Sepia',
+  'Invert colors', 'Sharpen', 'Blur', 'Gaussian blur', 'Motion blur', 'Noise reduction',
+  'Denoise', 'Vintage', 'Film', 'Black & white', 'Duotone', 'Pixelate', 'Posterize',
+  'Vignette', 'Convert to WebP', 'JPG', 'JPEG', 'PNG', 'WebP', 'BMP', 'GIF', 'AVIF',
+  'Set quality', 'Lossless compression', 'Lossy compression', 'Set transparency',
+  'Set color depth', 'Set DPI', 'Set resolution', 'Progressive JPEG',
+])
+const PDF_LOCAL_NAMES = new Set([
+  'Delete Pages', 'Duplicate page', 'Reverse page order', 'Add blank page', 'Reorder pages',
+  'Add text', 'Add watermark', 'Text watermark', 'Image watermark', 'Logo watermark',
+  'Headers', 'Footers', 'Page numbers', 'View metadata', 'Edit metadata', 'Remove metadata',
+  'Add metadata', 'Set title', 'Set author', 'Set subject', 'Set keywords',
+  'Highlight', 'Underline', 'Strikethrough', 'Text annotation', 'Signature', 'Initials',
+  'Add date', 'Add checkmark', 'Add cross', 'Add stamp',
+])
+const MEDIA_LOCAL_NAMES = new Set(['Trim video', 'Compress video', 'Convert video', 'Extract audio', 'Trim audio', 'Convert audio', 'Compress audio'])
+const OCR_LOCAL_NAMES = new Set(['Image to text'])
+const DOCUMENT_LOCAL_NAMES = new Set(['Edit document', 'Edit text', 'Find and replace', 'DOCX to TXT'])
+
+// Keep this map aligned with App.tsx: an operation is available only when a real route and processor exist.
+export const IMPLEMENTED_PROCESSORS: Record<string, string> = {
+  'compress-image': 'compress-image',
+  'resize-image': 'resize-image',
+  'rotate-image': 'image/rotate',
+  'flip-image': 'image/flip',
+  'grayscale-image': 'image/grayscale',
+  'convert-image': 'image/convert',
+  'crop-image': 'image/crop',
+  'brightness-image': 'image/brightness',
+  'contrast-image': 'image/contrast',
+  'sepia-image': 'image/sepia',
+  'invert-image': 'image/invert',
+  'blur-image': 'image/blur',
+  'pixelate-image': 'image/pixelate',
+  'saturation-image': 'image/saturation',
+  'hue-image': 'image/hue',
+  'vintage-image': 'image/vintage',
+  'vignette-image': 'image/vignette',
+  'merge-pdf': 'pdf/merge',
+  'split-pdf': 'pdf/split',
+  'extract-pages-pdf': 'pdf/extract',
+  'rotate-pages-pdf': 'pdf/rotate',
+  'images-to-pdf': 'pdf/images-to-pdf',
+}
 
 function slug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -92,10 +142,50 @@ function processingModeFor(family: FileCategory, category: string) {
 function buildRegistry(): OperationMeta[] {
   return blocks.flatMap(([family, category, names]) => names.map((name) => {
     const id = `${family}-${slug(name)}-${slug(category)}`
-    const path = name === 'Compress image' && family === 'image' && category === 'Quick Actions'
-      ? 'compress-image'
-      : name === 'Resize image' && family === 'image' && category === 'Quick Actions'
-        ? 'resize-image'
+    const operationKey = name === 'Compress image' ? 'compress-image'
+      : name === 'Resize image' ? 'resize-image'
+        : name === 'Resize' && family === 'image' ? 'resize-image'
+        : name === 'Rotate image' ? 'rotate-image'
+          : name === 'Rotate' && family === 'image' ? 'rotate-image'
+          : name === 'Flip image' ? 'flip-image'
+            : (name === 'Flip horizontal' || name === 'Flip vertical') && family === 'image' ? 'flip-image'
+            : name === 'Grayscale' ? 'grayscale-image'
+              : name === 'Convert image' ? 'convert-image'
+                : name === 'Crop image' ? 'crop-image'
+                  : name === 'Brightness' ? 'brightness-image'
+                    : name === 'Contrast' ? 'contrast-image'
+                      : name === 'Sepia' ? 'sepia-image'
+                        : name === 'Invert colors' ? 'invert-image'
+                          : name === 'Blur' ? 'blur-image'
+                            : name === 'Pixelate' ? 'pixelate-image'
+                              : name === 'Saturation' ? 'saturation-image'
+                                : name === 'Hue' ? 'hue-image'
+                                  : name === 'Vintage' ? 'vintage-image'
+                                        : name === 'Vignette' ? 'vignette-image'
+                                          : name === 'Black & white' ? 'grayscale-image'
+                                            : name === 'Convert to WebP' ? 'convert-image'
+                : name === 'Merge PDFs' ? 'merge-pdf'
+                  : name === 'Split PDF' ? 'split-pdf'
+                    : name === 'Extract Pages' ? 'extract-pages-pdf'
+                      : name === 'Rotate Pages' ? 'rotate-pages-pdf'
+                        : name === 'Images to PDF' ? 'images-to-pdf'
+                          : undefined
+    const path = operationKey && IMPLEMENTED_PROCESSORS[operationKey]
+      ? IMPLEMENTED_PROCESSORS[operationKey]
+      : family === 'text' && TEXT_LOCAL_NAMES.has(name)
+        ? `text/${slug(name)}`
+        : DATA_LOCAL_NAMES.has(name)
+          ? `data/${slug(name)}`
+          : family === 'pdf' && PDF_LOCAL_NAMES.has(name)
+            ? `pdf/${slug(name)}`
+          : MEDIA_LOCAL_NAMES.has(name)
+            ? `media/${slug(name)}`
+          : OCR_LOCAL_NAMES.has(name)
+            ? 'ocr'
+          : family === 'document' && DOCUMENT_LOCAL_NAMES.has(name)
+            ? `document/${slug(name)}`
+            : family === 'image' && IMAGE_LOCAL_NAMES.has(name)
+              ? `image/${slug(name)}`
         : undefined
     const available = Boolean(path)
     return {
@@ -112,7 +202,8 @@ function buildRegistry(): OperationMeta[] {
       processingMode: processingModeFor(family, category),
       available,
       previewSupport: available,
-      processor: path ? `image/${path}` : 'unimplemented',
+      processor: path ? path : 'unimplemented',
+      status: available ? 'AVAILABLE' : 'COMING_SOON',
       ...(path ? { path } : {}),
     }
   }))
@@ -125,7 +216,7 @@ export function getOperationsFor(family: FileCategory | null) {
 }
 
 export function getQuickOperationsFor(family: FileCategory | null) {
-  return getOperationsFor(family).filter((operation) => operation.quick).slice(0, 6)
+  return getOperationsFor(family).filter((operation) => operation.quick && operation.available).slice(0, 6)
 }
 
 export function getPopularOperationsFor(family: FileCategory | null) {

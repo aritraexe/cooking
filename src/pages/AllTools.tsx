@@ -5,7 +5,7 @@ import { FILE_CATEGORIES, operations } from '@/data/operations'
 import type { FileCategory, OperationMeta } from '@/types'
 
 function OperationCard({ operation }: { operation: OperationMeta }) {
-  const isAvailable = operation.available && Boolean(operation.path)
+  const isAvailable = operation.status === 'AVAILABLE' && Boolean(operation.path)
   const modeLabel = operation.processingMode === 'LOCAL_AI' ? 'Local AI' : operation.processingMode === 'LOCAL_HEAVY' ? 'Local engine' : 'Local'
   const content = (
     <>
@@ -37,7 +37,7 @@ export function AllTools() {
   const normalizedQuery = query.trim().toLowerCase()
   const filteredOperations = useMemo(() => operations.filter((operation) => {
     if (family !== 'all' && operation.family !== family) return false
-    if (scope === 'available' && !operation.available) return false
+    if (scope === 'available' && operation.status !== 'AVAILABLE') return false
     if (scope === 'quick' && !operation.quick) return false
     if (scope === 'popular' && !operation.popular) return false
     if (!normalizedQuery) return true
@@ -48,6 +48,7 @@ export function AllTools() {
     ...category,
     operations: filteredOperations.filter((operation) => operation.family === category.id),
   })).filter((category) => category.operations.length > 0)
+  const availableCount = operations.filter((operation) => operation.status === 'AVAILABLE').length
 
   return (
     <main className="mx-auto max-w-6xl px-6 pb-20 pt-12 sm:pt-16">
@@ -57,7 +58,7 @@ export function AllTools() {
         <p className="mt-3 text-base leading-relaxed text-ink-muted">Browse by file type and category, or search directly for the operation you need. Available tools run locally on your device; future tools stay visible as a roadmap.</p>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <p className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1.5 text-xs text-accent">🔒 Your files stay on your device</p>
-          <span className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted">{operations.length} registered operations</span>
+          <span className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted">{availableCount} available · {operations.length} registered</span>
         </div>
       </div>
 
@@ -76,6 +77,7 @@ export function AllTools() {
       <div className="mt-4 flex flex-wrap gap-2">
         {([['all', 'All operations'], ['available', 'Available locally'], ['quick', 'Quick actions'], ['popular', 'Popular']] as const).map(([value, label]) => <button key={value} type="button" onClick={() => setScope(value)} className={`rounded-full border px-3 py-1.5 text-xs font-medium ${scope === value ? 'border-accent/50 bg-accent/10 text-accent' : 'border-line text-ink-muted hover:text-ink'}`}>{label}</button>)}
       </div>
+      {scope === 'available' && <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-accent/5 px-3 py-2.5 text-xs text-accent"><span>Showing only the {availableCount} processors that are working right now.</span><button type="button" onClick={() => setScope('all')} className="shrink-0 font-semibold underline underline-offset-4">Show all {operations.length}</button></div>}
 
       <div className="mt-10 space-y-12">
         {grouped.map((category) => {

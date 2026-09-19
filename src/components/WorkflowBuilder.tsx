@@ -10,16 +10,17 @@ interface WorkflowBuilderProps {
   onOpenOperation: (operation: OperationMeta) => void
 }
 
-function OperationButton({ operation, onClick }: { operation: OperationMeta; onClick: () => void }) {
+function OperationButton({ operation, onClick, selectable = true }: { operation: OperationMeta; onClick: () => void; selectable?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={!selectable}
       className="group flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl border border-line/70 bg-page/45 px-3.5 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-accent/40 hover:bg-surface-hover"
     >
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium text-ink">{operation.name}</span>
-        <span className="mt-0.5 block truncate text-xs text-ink-muted">{operation.description}</span>
+        <span className="mt-0.5 block truncate text-xs text-ink-muted">{selectable ? operation.description : 'Coming soon — local processor not connected yet.'}</span>
       </span>
       <ChevronRight className="h-4 w-4 shrink-0 text-ink-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent" aria-hidden="true" />
     </button>
@@ -201,7 +202,7 @@ export function WorkflowBuilder({ family, hasFiles, onFamilyChange, onOpenOperat
               {!search && family && !category && popularOperations.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-medium text-ink-muted">Popular</p><div className="flex flex-wrap gap-2">{popularOperations.map((operation) => <button key={operation.id} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted hover:border-accent/40 hover:text-accent">{operation.name}</button>)}</div></div>}
               {!search && family && !category && suggestions.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-medium text-ink-muted">Suggested for this file</p><div className="flex flex-wrap gap-2">{suggestions.map((name) => { const operation = operations.find((item) => item.name === name); return operation ? <button key={name} type="button" onClick={() => addOperation(operation)} className="rounded-full border border-accent/25 bg-accent/5 px-3 py-1.5 text-xs text-accent hover:border-accent/50">{name}</button> : null })}</div></div>}
               <p className="mb-2 text-xs font-medium text-ink-muted">{search ? `${visibleOperations.length} results` : category ?? 'All modifications'}</p>
-              <div className="space-y-2">{visibleOperations.map((operation) => <OperationButton key={operation.id} operation={operation} onClick={() => addOperation(operation)} />)}</div>
+              <div className="space-y-2">{visibleOperations.map((operation) => <OperationButton key={operation.id} operation={operation} selectable={operation.available} onClick={() => { if (operation.available) addOperation(operation) }} />)}</div>
               {visibleOperations.length === 0 && <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-ink-muted">No modifications match that search.</p>}
             </div>
           </div>
